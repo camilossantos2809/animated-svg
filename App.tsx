@@ -6,9 +6,12 @@ import {
   View,
   TouchableOpacity,
   Text,
+  Easing,
 } from "react-native";
 import Logo from "./src/Logo";
 import Light from "./src/Light";
+
+const WIDTH_LIGHT = 200;
 
 export default function App() {
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -17,8 +20,9 @@ export default function App() {
     Animated.loop(
       Animated.timing(animatedValue, {
         toValue: 2,
-        duration: 6000,
-        useNativeDriver: false,
+        duration: 5000,
+        useNativeDriver: true,
+        easing: Easing.linear,
       })
     );
 
@@ -30,21 +34,18 @@ export default function App() {
     animation().stop();
   };
 
-  const inputRange = [0, 0.5, 1, 1.5, 2];
+  const inputRange = [0, 1, 2];
 
   const rotateY = animatedValue.interpolate({
-    inputRange,
-    outputRange: ["0deg", "-90deg", "-180deg", "-270deg", "-360deg"],
+    inputRange: [0, 2],
+    outputRange: ["0deg", "360deg"],
+    extrapolate: "clamp",
   });
 
-  const translateX = animatedValue.interpolate({
+  const opacity = animatedValue.interpolate({
     inputRange,
-    outputRange: [0, 0, -200, -100, 0],
-  });
-
-  const scale = animatedValue.interpolate({
-    inputRange,
-    outputRange: [1, 20, 1, 0, 1],
+    outputRange: [0.85, 0.5, 0.85],
+    extrapolate: "clamp",
   });
 
   return (
@@ -54,16 +55,16 @@ export default function App() {
         style={[
           styles.containerLight,
           {
+            opacity,
             transform: [
-              { translateX },
+              { translateX: -(WIDTH_LIGHT + 50) / 2 },
               { rotateY },
-              { perspective: 50 },
-              { scale },
+              { translateX: (WIDTH_LIGHT + 50) / 2 },
             ],
           },
         ]}
       >
-        <Light width={170} height={200} />
+        <Light width={WIDTH_LIGHT} height={200} />
       </Animated.View>
       <View style={styles.containerButton}>
         <TouchableOpacity style={styles.button} onPress={onStart}>
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
   },
   containerLight: {
     position: "absolute",
-    right: 0,
+    right: -30,
     top: -70,
   },
   containerButton: {
